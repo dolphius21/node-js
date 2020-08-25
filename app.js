@@ -1,3 +1,8 @@
-console.log('Hello World!');
-console.error('Oooops something went wrong');
-console.dir({name: 'Andrew', age: 33});
+// Problem: We need a simple way to look at a user's badge count and JavaScript points
+// Solution: Use Node.js to connect to Treehouse's API to get profile information to print out
+const profile = require('./profle.js')
+
+const users = process.argv.slice(2);
+users.forEach(profile.get);
+
+
