@@ -1,7 +1,11 @@
-// Express module
+// Dependencies
+const Joi = require("joi");
 const express = require("express");
 const app = express();
 
+app.use(express.json());
+
+// Course objects
 const courses = [
    { id: 1, name: "course1" },
    { id: 2, name: "course2" },
@@ -15,22 +19,73 @@ app.get("/", (req, res) => {
 });
 
 // Route parameters => named URL segments that are used to capture the values specified at their position in the URL. The captured values are populated in the req.params object, with the name of the route parameter specified in the path as their respective keys.
+app.get("/api/posts/:year/:month", (req, res) => {
+   res.send(req.params);
+});
 /* 
    Route path: /api/posts/:year/:month
    Request URL: http://localhost:3000/api/posts/2018/1
    req.params: { year: "2018", month: "1" }
 */
-app.get("/api/posts/:year/:month", (req, res) => {
-   res.send(req.params);
-});
 
 app.get("/api/courses", (req, res) => {
    res.send(courses);
 });
 
+// validate course func
+const validateCourse = (course) => {
+   // schema
+   const schema = {
+      name: Joi.string().min(3).required(),
+   };
+   // Validate
+   return Joi.validate(course, schema);
+};
+
+// post method
+app.post("/api/courses", (req, res) => {
+   // validate
+   const { error } = validateCourse(req.body);
+   if (error) {
+      res.status(400).send(error.details[0].message);
+      return;
+   }
+
+   // course object
+   const course = {
+      id: courses.length + 1,
+      name: req.body.name,
+   };
+   courses.push(course);
+   res.send(course);
+});
+
+// put method
+app.put("/api/courses/:id", (req, res) => {
+   // Look up the course
+   const course = courses.find((course) => course.id === +req.params.id);
+   // if id not found
+   if (!course) return res.status(404).send("The course with the given ID was not found.");
+
+   // validate
+   const { error } = validateCourse(req.body);
+   if (error) {
+      res.status(400).send(error.details[0].message);
+      return;
+   }
+
+   // Update course
+   course.name = req.body.name;
+   // Return updated course
+   res.send(course);
+});
+
+// get method
 app.get("/api/courses/:id", (req, res) => {
    const course = courses.find((course) => course.id === +req.params.id);
+   // if id not found
    if (!course) return res.status(404).send("The course with the given ID was not found.");
+   // if found
    res.send(course);
 });
 
