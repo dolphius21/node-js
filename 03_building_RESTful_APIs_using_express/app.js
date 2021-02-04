@@ -28,6 +28,7 @@ app.get("/api/posts/:year/:month", (req, res) => {
    req.params: { year: "2018", month: "1" }
 */
 
+// GET Method
 app.get("/api/courses", (req, res) => {
    res.send(courses);
 });
@@ -42,14 +43,11 @@ const validateCourse = (course) => {
    return Joi.validate(course, schema);
 };
 
-// post method
+// POST method
 app.post("/api/courses", (req, res) => {
    // validate
    const { error } = validateCourse(req.body);
-   if (error) {
-      res.status(400).send(error.details[0].message);
-      return;
-   }
+   if (error) return res.status(400).send(error.details[0].message);
 
    // course object
    const course = {
@@ -60,7 +58,7 @@ app.post("/api/courses", (req, res) => {
    res.send(course);
 });
 
-// put method
+// PUT method
 app.put("/api/courses/:id", (req, res) => {
    // Look up the course
    const course = courses.find((course) => course.id === +req.params.id);
@@ -69,10 +67,7 @@ app.put("/api/courses/:id", (req, res) => {
 
    // validate
    const { error } = validateCourse(req.body);
-   if (error) {
-      res.status(400).send(error.details[0].message);
-      return;
-   }
+   if (error) return res.status(400).send(error.details[0].message);
 
    // Update course
    course.name = req.body.name;
@@ -80,7 +75,21 @@ app.put("/api/courses/:id", (req, res) => {
    res.send(course);
 });
 
-// get method
+// DELETE method
+app.delete("/api/courses/:id", (req, res) => {
+   // Look up the course
+   const course = courses.find((course) => course.id === +req.params.id);
+   // if id not found
+   if (!course) return res.status(404).send("The course with the given ID was not found.");
+
+   // Delete course
+   const index = courses.indexOf(course);
+   courses.splice(index, 1);
+   // return
+   res.send(course);
+});
+
+// GET method
 app.get("/api/courses/:id", (req, res) => {
    const course = courses.find((course) => course.id === +req.params.id);
    // if id not found
